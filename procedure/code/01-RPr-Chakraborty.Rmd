@@ -10,7 +10,7 @@ knit: (function(inputFile, encoding) {
   rmarkdown::render(inputFile, encoding = encoding, output_dir = "../../docs/report") })
 ---
 
-Version 2.0 \| First Created July 7, 2021 \| Updated June 26, 2023
+Version 2.0 \| First Created July 7, 2021 \| Updated September 21, 2023
 
 # Abstract
 
@@ -137,7 +137,6 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.path = paste0(here("results", "figures"), "/")
 )
-```
 
 # Data
 
@@ -177,7 +176,6 @@ Details on ACS data collection can be found at <https://www.census.gov/topics/he
 
 American Community Survey (ACS) data for sociodemographic subcategories of people with disabilities can be accessed by using the `tidycensus` package to query the Census API. This requires an API key which can be acquired at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html).
 
-```{r API-Load-ACS, eval=FALSE}
 # If you wish to use a census API key, run the census_api_key() function in the console
 
 # Query disability demographic data with geographic boundaries
@@ -1354,7 +1352,7 @@ The maps and crosstabulation above indicate that there are important differences
 We summarize our understanding of the computational differences for default settings below, based on close examination of our software outputs, technical documentation for SaTScan, and the documentation and code repository for SpatialEpi.
 
 |                          |      SaTScan Hierarchical      |            SaTScan GINI            |                  SpatialEpi                  |
-|:----------------:|:----------------:|:----------------:|:----------------:|
+|:------------------------:|:------------------------------:|:----------------------------------:|:--------------------------------------------:|
 |     possible shapes      |  circle (default) or ellipse   |    circle (default) or ellipse     |                    circle                    |
 | possible cluster centers | locations with rates \> normal |   locations with rates \> normal   |                all locations                 |
 |   maximum cluster size   |          50% of cases          | varies, not exceeding 50% of cases |              50% of population               |
@@ -1875,8 +1873,6 @@ tm_gee_weights
 
 # re
 ```
-
-
 
 ```{r save-figures, eval = F}
 # save figures as image files
