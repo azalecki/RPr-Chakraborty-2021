@@ -137,12 +137,11 @@ knitr::opts_chunk$set(
   fig.width = 8,
   fig.path = paste0(here("results", "figures"), "/")
 )
-
+```
 # Data
 
 ## ACS Socio-demographic data
-
-The American Community Survey (ACS) five-year estimate (2014-2018) variables used in the study are outlined in the table below.
+ The American Community Survey (ACS) five-year estimate (2014-2018) variables used in the study are outlined in the table below.
 Details on ACS data collection can be found at <https://www.census.gov/topics/health/disability/guidance/data-collection-acs.html> and details on sampling methods and accuracy can be found at <https://www.census.gov/programs-surveys/acs/technical-documentation/code-lists.html>.
 
 |                            Variable Name in Study                            |                                               ACS Variable name                                                |
@@ -175,7 +174,7 @@ Details on ACS data collection can be found at <https://www.census.gov/topics/he
 : Disability Subgroup Variables
 
 American Community Survey (ACS) data for sociodemographic subcategories of people with disabilities can be accessed by using the `tidycensus` package to query the Census API. This requires an API key which can be acquired at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html).
-
+```{r acs-data}
 # If you wish to use a census API key, run the census_api_key() function in the console
 
 # Query disability demographic data with geographic boundaries
@@ -354,7 +353,7 @@ However, we replace the missing data with zeros, producing results identical to 
 
 ```{r missing data}
 # county with missing data
-filter(acs_covid, is.na(bpov_pct)) %>% st_drop_geometry() %>% kable()
+filter(acs_covid, is.na(bpov_pct)) %>% st_drop_geometry() %>% kable(caption = "missing data") %>% kable_styling()
 
 # replace NA with 0 for missing data
 acs_covid[is.na(acs_covid$bpov_pct), ]$bpov_pct <- 0
@@ -1856,7 +1855,7 @@ tm_gee_weights <- tm_shape(gee_resid) +
     lwd = 0.2,
     palette = "Oranges",
     legend.hist = FALSE,
-    midpoint = 0
+    midpoint = 0.5
   ) +
   tm_shape(state) +
     tm_borders("grey", lwd = .5) +
