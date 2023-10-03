@@ -1807,6 +1807,33 @@ tm_gee_residuals <- tm_shape(gee_resid) +
 
 tm_gee_residuals
 ```
+```{r map-residualclusters}
+tm_gee_residualclusters <- tm_shape(gee_resid) +
+  tm_polygons("ss_clusID",
+    title = "Race Model Residual Clusters",
+    style = "equal",
+    n = 7,
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = c("Set3"),
+    legend.hist = FALSE,
+    midpoint = 0
+  ) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = 1) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5,
+    legend.width = 0.25,
+    legend.hist.size = 0.5,
+    legend.hist.height = 0.15
+  )
+
+tm_gee_residualclusters
+```
+
+
 
 Calculate variance, covariance, correlation, and weights
 
