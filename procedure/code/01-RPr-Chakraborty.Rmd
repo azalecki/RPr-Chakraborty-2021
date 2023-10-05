@@ -1808,18 +1808,15 @@ tm_gee_residuals <- tm_shape(gee_resid) +
 tm_gee_residuals
 ```
 ```{r map-residualclusters}
-tm_gee_residualclusters <- tm_shape(gee_resid) +
-  tm_polygons("ss_clusID",
-    title = "Race Model Residual Clusters",
-    style = "equal",
-    n = 7,
-    border.alpha = .2,
-    lwd = 0.2,
-    palette = c("Set3"),
-    legend.hist = FALSE,
-    midpoint = 0
-  ) +
-  tm_shape(state) +
+
+study_state <- filter(state, STATEFP == '12'  | STATEFP == '13' | STATEFP == '01' | STATEFP == '45') 
+
+tm_gee_residualclusters <- tm_shape(gee_resid) + 
+  tm_polygons(col= "ss_clusID", pal = c("red", "skyblue", "white"))
+
+
+  tm_shape(study_state) +
+    tm_polygons()
     tm_borders("grey", lwd = 1) +
   tm_layout(
     legend.position = c("left", "bottom"),
