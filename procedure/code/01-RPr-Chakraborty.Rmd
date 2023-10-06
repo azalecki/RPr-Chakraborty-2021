@@ -1809,11 +1809,25 @@ tm_gee_residuals
 ```
 ```{r map-residualclusters}
 
-study_state <- filter(state, STATEFP == '12'  | STATEFP == '13' | STATEFP == '01' | STATEFP == '45') 
+study_states <- filter(gee_data, statefp == '12'  | statefp == '13' | statefp == '01' | statefp == '45') 
 
-tm_gee_residualclusters <- tm_shape(gee_resid) + 
-  tm_polygons(col= "ss_clusID", pal = c("red", "skyblue", "white"))
+gee_resid_nogeo <- gee_resid %>% st_drop_geometry()
 
+merged_study_states <- merge(x = study_states, y = gee_resid_nogeo, by = "ss_clusID", all = TRUE)
+
+gee_resid_nogeo <- data.frame()
+
+tm_gee_residuals <- tm_shape(merged_study_states) +
+  tm_polygons("response",
+    title = "Race Model Residuals",
+    style = "equal",
+    n = 7,
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "RdBu",
+    legend.hist = FALSE,
+    midpoint = 0 )
+    
 
   tm_shape(study_state) +
     tm_polygons()
