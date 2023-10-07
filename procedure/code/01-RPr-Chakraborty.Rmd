@@ -1811,27 +1811,21 @@ tm_gee_residuals
 
 study_states <- filter(gee_data, statefp == '12'  | statefp == '13' | statefp == '01' | statefp == '45') 
 
-gee_resid_nogeo <- gee_resid %>% st_drop_geometry()
+merged_study_states <- st_join(study_states, gee_resid, join = st_intersects, left = TRUE)
 
-merged_study_states <- merge(x = study_states, y = gee_resid_nogeo, by = "ss_clusID", all = TRUE)
-
-gee_resid_nogeo <- data.frame()
-
-tm_gee_residuals <- tm_shape(merged_study_states) +
-  tm_polygons("response",
-    title = "Race Model Residuals",
-    style = "equal",
-    n = 7,
-    border.alpha = .2,
+tm_gee_residuals_clusters <- 
+  tm_shape(study_states) +
+  tm_fill("gray98") +
+  tm_shape(merged_study_states) +
+  tm_polygons( col = "ss_clusID.x",
+    labels = "gee clusters",
+    border.col = "white",
     lwd = 0.2,
-    palette = "RdBu",
-    legend.hist = FALSE,
-    midpoint = 0 )
-    
-
-  tm_shape(study_state) +
-    tm_polygons()
-    tm_borders("grey", lwd = 1) +
+    palette = "Set 3"),
+    legend.hist = FALSE
+  ) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = .5) +
   tm_layout(
     legend.position = c("left", "bottom"),
     legend.title.size = 0.8,
@@ -1841,7 +1835,8 @@ tm_gee_residuals <- tm_shape(merged_study_states) +
     legend.hist.height = 0.15
   )
 
-tm_gee_residualclusters
+tm_gee_residuals_clusters
+
 ```
 
 
