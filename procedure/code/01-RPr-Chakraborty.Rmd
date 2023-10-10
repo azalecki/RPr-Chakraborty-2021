@@ -1811,6 +1811,7 @@ tm_gee_residuals
 
 geometry_data <- filter(gee_data, statefp == 06| statefp == 35 | statefp == 04 | statefp == 49)
 
+<<<<<<< HEAD
 
 intersection <- st_intersection(gee_resid, geometry_data)
 
@@ -1824,6 +1825,20 @@ tm_gee_residuals_se <- tm_shape(intersection) +
     palette = "RdBu",
     legend.hist = FALSE,
     midpoint = 0
+=======
+merged_study_states <- st_join(study_states, gee_resid, join = st_intersects, left = TRUE)
+
+tm_gee_residuals_clusters <- 
+  tm_shape(study_states) +
+  tm_fill("gray98") +
+  tm_shape(merged_study_states) +
+  tm_polygons( col = "ss_clusID.x",
+    labels = "gee clusters",
+    border.col = "white",
+    lwd = 0.2,
+    palette = "Set 3"),
+    legend.hist = FALSE
+>>>>>>> 7c7c4fb542276f1d3829fda53f237780345d4104
   ) +
   tm_shape(state) +
     tm_borders("grey", lwd = .5) +
@@ -1836,7 +1851,11 @@ tm_gee_residuals_se <- tm_shape(intersection) +
     legend.hist.height = 0.15
   )
 
+<<<<<<< HEAD
 tm_gee_residuals_se
+=======
+tm_gee_residuals_clusters
+>>>>>>> 7c7c4fb542276f1d3829fda53f237780345d4104
 
 ```
 ```{r map-clusters-se}
