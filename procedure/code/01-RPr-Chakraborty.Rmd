@@ -1807,17 +1807,14 @@ tm_gee_residuals <- tm_shape(gee_resid) +
 
 tm_gee_residuals
 ```
-```{r map-residualclusters}
+```{r map-residualclusters-se}
 
-study_states <- filter(gee_data, statefp == '12'  | statefp == '13' | statefp == '01' | statefp == '45') 
+geometry_data <- filter(gee_data, statefp == 06| statefp == 35 | statefp == 04 | statefp == 49)
 
-gee_resid_nogeo <- gee_resid %>% st_drop_geometry()
 
-merged_study_states <- merge(x = study_states, y = gee_resid_nogeo, by = "ss_clusID", all = TRUE)
+intersection <- st_intersection(gee_resid, geometry_data)
 
-gee_resid_nogeo <- data.frame()
-
-tm_gee_residuals <- tm_shape(merged_study_states) +
+tm_gee_residuals_se <- tm_shape(intersection) +
   tm_polygons("response",
     title = "Race Model Residuals",
     style = "equal",
@@ -1826,12 +1823,10 @@ tm_gee_residuals <- tm_shape(merged_study_states) +
     lwd = 0.2,
     palette = "RdBu",
     legend.hist = FALSE,
-    midpoint = 0 )
-    
-
-  tm_shape(study_state) +
-    tm_polygons()
-    tm_borders("grey", lwd = 1) +
+    midpoint = 0
+  ) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = .5) +
   tm_layout(
     legend.position = c("left", "bottom"),
     legend.title.size = 0.8,
@@ -1841,11 +1836,21 @@ tm_gee_residuals <- tm_shape(merged_study_states) +
     legend.hist.height = 0.15
   )
 
-tm_gee_residualclusters
+tm_gee_residuals_se
+
 ```
+```{r map-clusters-se}
+
+intersection_clus <- st_intersection (gee_data, geometry_data)
+
+tm_gee_clusters <- tm_shape(intersection_clus) +
+  tm_fill("clusterID",
+          palette = c("wheat", "tomato", "thistle3"), 
+          n = 4)
 
 
-
+tm_gee_clusters
+```
 Calculate variance, covariance, correlation, and weights
 
 ```{r weights}
