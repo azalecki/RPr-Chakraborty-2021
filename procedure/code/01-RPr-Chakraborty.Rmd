@@ -138,10 +138,12 @@ knitr::opts_chunk$set(
   fig.path = paste0(here("results", "figures"), "/")
 )
 ```
+
 # Data
 
 ## ACS Socio-demographic data
- The American Community Survey (ACS) five-year estimate (2014-2018) variables used in the study are outlined in the table below.
+
+The American Community Survey (ACS) five-year estimate (2014-2018) variables used in the study are outlined in the table below.
 Details on ACS data collection can be found at <https://www.census.gov/topics/health/disability/guidance/data-collection-acs.html> and details on sampling methods and accuracy can be found at <https://www.census.gov/programs-surveys/acs/technical-documentation/code-lists.html>.
 
 |                            Variable Name in Study                            |                                               ACS Variable name                                                |
@@ -174,6 +176,7 @@ Details on ACS data collection can be found at <https://www.census.gov/topics/he
 : Disability Subgroup Variables
 
 American Community Survey (ACS) data for sociodemographic subcategories of people with disabilities can be accessed by using the `tidycensus` package to query the Census API. This requires an API key which can be acquired at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html).
+
 ```{r acs-data}
 # If you wish to use a census API key, run the census_api_key() function in the console
 
@@ -1351,7 +1354,7 @@ The maps and crosstabulation above indicate that there are important differences
 We summarize our understanding of the computational differences for default settings below, based on close examination of our software outputs, technical documentation for SaTScan, and the documentation and code repository for SpatialEpi.
 
 |                          |      SaTScan Hierarchical      |            SaTScan GINI            |                  SpatialEpi                  |
-|:---------------:|:---------------:|:---------------:|:-------------------:|
+|:---------------:|:---------------:|:---------------:|:------------------:|
 |     possible shapes      |  circle (default) or ellipse   |    circle (default) or ellipse     |                    circle                    |
 | possible cluster centers | locations with rates \> normal |   locations with rates \> normal   |                all locations                 |
 |   maximum cluster size   |          50% of cases          | varies, not exceeding 50% of cases |              50% of population               |
@@ -1780,9 +1783,27 @@ gee_resid <- data.frame(
 # if the datascienceblog is correct, the code pearson's residual should be divided by the square root of the fitted value.
 # code: https://github.com/cran/geepack/blob/master/R/geeglm.R
 # blog: https://www.datascienceblog.net/post/machine-learning/interpreting_generalized_linear_models
+
+# create data frame with residuals for sat scan gini optimized
+gee_resid_gini <- data.frame(
+  select(gee_gini_clus_rpdep$models[[1]]$data, covid_rate, ss_clusID),
+  data.frame(fitvals = gee_gini_clus_rpdep$models[[1]]$fitted.values),
+  data.frame(residual = gee_gini_clus_rpdep$models[[1]]$residual),
+  data.frame(working = residuals(gee_gini_clus_rpdep$models[[1]], type = "working")),
+  data.frame(response = residuals(gee_gini_clus_rpdep$models[[1]], type = "response")),
+  data.frame(pearson = residuals(gee_gini_clus_rpdep$models[[1]], type = "pearson"))
+) %>%
+  mutate(
+    my_working = (covid_rate - fitvals) / fitvals,
+    my_pearson = response * (sqrt(gee_gini_clus_rpdep$models[[1]]$prior.weights)) / sqrt(fitvals^2)
+  ) %>%
+  st_sf()
+
+
 ```
 
 ```{r map-residuals}
+# map of residuals from correct covid incidence model
 tm_gee_residuals <- tm_shape(gee_resid) +
   tm_polygons("response",
     title = "Race Model Residuals",
@@ -1806,18 +1827,12 @@ tm_gee_residuals <- tm_shape(gee_resid) +
   )
 
 tm_gee_residuals
-```
-```{r map-residualclusters-se}
 
-geometry_data <- filter(gee_data, statefp == 06| statefp == 35 | statefp == 04 | statefp == 49)
+# map of residuals from sat scan gini optimized clusters 
 
-<<<<<<< HEAD
-
-intersection <- st_intersection(gee_resid, geometry_data)
-
-tm_gee_residuals_se <- tm_shape(intersection) +
+tm_gee_residuals_gini <- tm_shape(gee_resid_gini) +
   tm_polygons("response",
-    title = "Race Model Residuals",
+    title = "Race Model Residuals GINI",
     style = "equal",
     n = 7,
     border.alpha = .2,
@@ -1825,20 +1840,6 @@ tm_gee_residuals_se <- tm_shape(intersection) +
     palette = "RdBu",
     legend.hist = FALSE,
     midpoint = 0
-=======
-merged_study_states <- st_join(study_states, gee_resid, join = st_intersects, left = TRUE)
-
-tm_gee_residuals_clusters <- 
-  tm_shape(study_states) +
-  tm_fill("gray98") +
-  tm_shape(merged_study_states) +
-  tm_polygons( col = "ss_clusID.x",
-    labels = "gee clusters",
-    border.col = "white",
-    lwd = 0.2,
-    palette = "Set 3"),
-    legend.hist = FALSE
->>>>>>> 7c7c4fb542276f1d3829fda53f237780345d4104
   ) +
   tm_shape(state) +
     tm_borders("grey", lwd = .5) +
@@ -1851,13 +1852,10 @@ tm_gee_residuals_clusters <-
     legend.hist.height = 0.15
   )
 
-<<<<<<< HEAD
-tm_gee_residuals_se
-=======
-tm_gee_residuals_clusters
->>>>>>> 7c7c4fb542276f1d3829fda53f237780345d4104
+tm_gee_residuals_gini
 
 ```
+
 ```{r map-clusters-se}
 
 intersection_clus <- st_intersection (gee_data, geometry_data)
@@ -1870,6 +1868,7 @@ tm_gee_clusters <- tm_shape(intersection_clus) +
 
 tm_gee_clusters
 ```
+
 Calculate variance, covariance, correlation, and weights
 
 ```{r weights}
@@ -2022,7 +2021,6 @@ We re-classified the GEE clustering IDs based on state and cluster relative risk
 Upon discovering different results in all of our reproduction GEE models compared to the original study, we added new models to assess the extent to which the different computational environment was causing differences in our results.
 We therefore ran another set of the five GEE models using data provided by the original author, expecting to find identical results.
 
-
 # Emily's Discussion
 
 Our reproduction of the original study was partially successful, leading to similar, but inexact results compared to the original study.
@@ -2115,7 +2113,7 @@ The study accounts for spatial dependency using the GEE models to cluster county
 However, the GEE method simply uses correlation matrices to weight each county observation according to the number of observations in its cluster and the overall within-cluster correlation of standard errors.
 The spatial dependence between counties in different clusters is not modelled, even if the counties are adjacent to each other.
 
-### Conclusion 
+### Conclusion
 
 In sum, although some of our results differed from Chakraborty's because of differences in analytical methods, conceptualizations, and computational environments, our reproduction results still suggest that PwDs are likely to experience multiple jeopardy based on the convergence of their disability, racial/ethnic minority, and poverty status.
 We reiterate Chakraborty's carefully limited interpretation emphasizing county-level relationships and the need for additional data and research, because the estimated relationship at the county level may not hold at the individual level.
