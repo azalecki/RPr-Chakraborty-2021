@@ -92,7 +92,7 @@ Other software are not specified in the publication; however data files suggest 
 
 This reproduction study uses R, including the SpatialEpi package for the Kulldorff spatial scan statistics and the geepack package for GEE models.
 
-```{r setup, include = FALSE}
+```{r setup, eval = FALSE}
 # list of required packages
 packages <- c(
   "tidycensus", "tidyverse", "downloader", "sf", "classInt", "readr",
@@ -123,7 +123,7 @@ groundhog.library(packages, groundhog.day)
 # In RStudio, restart r with Session -> Restart Session
 
 # non-groundhog method for installing packages:
-# lapply(packages, library, character.only = TRUE)
+lapply(packages, library, character.only = TRUE)
 
 # save the R processing environment
 writeLines(
