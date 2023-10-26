@@ -21,14 +21,14 @@ Improve the missing data table with Kable and/or KableExtra functions as well as
 ***Visualization***
 The improved table will contain the correct data and be in a vertical position.
 
-4. Mapping Residuals to Test Independence Assumptions
+4. Mapping Residuals of Race 
 ***Analysis***
-In Chakraborty's study, generalized estimating equations (GEEs) were used to conduct a multivariate analysis of the disability subgroups and the socio-demographic categories. Clusters were pre-defined by state and by significant clusters of Covid-19 cases. It is assumed in the study that there is a possible correlation within the clusters (for example, within the same state). However, the GEE models also assume independence which means that there is no important correlation between clusters. My question is: 
-How do we know that the clusters are independent of eachother? 
+In the reproduction of Chakraborty's study, a map of Race Model Residuals was generated to observe the differences between observed and predicted values from the gee model. There was only one map made for the model that corrected for Covid Incidence Rate. I am curious to see the spatial distribution of error for the other 3 models from the reproduction. I beliece this will help us assess the quality of the model and consider its future use. 
+
 ***Visualization***
-I will attempt to answer this question by mapping the errors and clusters of overestimates. By anayzing the map visualization we can look at the cluster of overestimates of errors and see if they cross over any state boundaries. 
+I will visualize this data by first calculating the residuals with the data from the 3 other models: "Switch to R Geepack", "SatScan Gini Optimized Clusters", and "Spatial EPI Clusters." Then I will generate 3 national level maps of their residuals resembling the Race Model Residuals map. By anayzing the map visualization we can observe how different models under/over predict outcomes.  
 ***Discussion***
-If my new/revised map shows clusters of overestimates crossing over state boundaries, it will mean that we cannot fully assume that the clusters are independent of eachother
+If the new maps show dispraportionate over/under estimates in certain areas of the country that would be a cause for concern. Ideally, the models should aim to predict values as close to the observed values to assume correctness. If they don't we might need to consider making some changes to the models in order to fix the over/under estimates. 
 
 5. Integration of Discussion Section
 ***Analysis*** 

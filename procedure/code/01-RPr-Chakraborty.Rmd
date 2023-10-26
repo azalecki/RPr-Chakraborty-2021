@@ -1,6 +1,6 @@
 ---
 title: "Reproduction of Chakraborty 2021: An intracategorical analysis of COVID-19 and people with disabilities"
-author: "Joseph Holler, Junyi Zhou, Peter Kedron, Drew An-Pham, Derrick Burt"
+author: "Joseph Holler, Junyi Zhou, Peter Kedron, Drew An-Pham, Derrick Burt, Alexandra Zalecki"
 date: "`r Sys.Date()`"
 output: pdf_document
 editor_options:
@@ -1354,7 +1354,7 @@ The maps and crosstabulation above indicate that there are important differences
 We summarize our understanding of the computational differences for default settings below, based on close examination of our software outputs, technical documentation for SaTScan, and the documentation and code repository for SpatialEpi.
 
 |                          |      SaTScan Hierarchical      |            SaTScan GINI            |                  SpatialEpi                  |
-|:---------------:|:---------------:|:---------------:|:------------------:|
+|:----------------:|:----------------:|:----------------:|:------------------:|
 |     possible shapes      |  circle (default) or ellipse   |    circle (default) or ellipse     |                    circle                    |
 | possible cluster centers | locations with rates \> normal |   locations with rates \> normal   |                all locations                 |
 |   maximum cluster size   |          50% of cases          | varies, not exceeding 50% of cases |              50% of population               |
@@ -1759,7 +1759,7 @@ Counter-intuitively, the two coefficients for elderly people with disability wer
 ### Interpret GEE Model
 
 ```{r residuals}
-# create data frame with residuals
+# create data frame with residuals (for correct covid incidence)
 gee_resid <- data.frame(
   select(gee_or_clus_rpdep$models[[1]]$data, covid_rate, ss_clusID),
   data.frame(fitvals = gee_or_clus_rpdep$models[[1]]$fitted.values),
@@ -1784,6 +1784,22 @@ gee_resid <- data.frame(
 # code: https://github.com/cran/geepack/blob/master/R/geeglm.R
 # blog: https://www.datascienceblog.net/post/machine-learning/interpreting_generalized_linear_models
 
+
+# create data frame with residuals for r Geepack model 
+gee_resid_gp <- data.frame(
+  select(gee_or_clus_ordep$models[[1]]$data, covid_rate, ss_clusID),
+  data.frame(fitvals = gee_or_clus_ordep$models[[1]]$fitted.values),
+  data.frame(residual = gee_or_clus_ordep$models[[1]]$residual),
+  data.frame(working = residuals(gee_or_clus_ordep$models[[1]], type = "working")),
+  data.frame(response = residuals(gee_or_clus_ordep$models[[1]], type = "response")),
+  data.frame(pearson = residuals(gee_or_clus_ordep$models[[1]], type = "pearson"))
+) %>%
+  mutate(
+    my_working = (covid_rate - fitvals) / fitvals,
+    my_pearson = response * (sqrt(gee_or_clus_ordep$models[[1]]$prior.weights)) / sqrt(fitvals^2)
+  ) %>%
+  st_sf()
+
 # create data frame with residuals for sat scan gini optimized
 gee_resid_gini <- data.frame(
   select(gee_gini_clus_rpdep$models[[1]]$data, covid_rate, ss_clusID),
@@ -1799,6 +1815,20 @@ gee_resid_gini <- data.frame(
   ) %>%
   st_sf()
 
+# create data frame with residuals for Spatial EPI clusters model 
+gee_resid_epi <- data.frame(
+  select(gee_rp_clus_rpdep$models[[1]]$data, covid_rate, ss_clusID),
+  data.frame(fitvals = gee_rp_clus_rpdep$models[[1]]$fitted.values),
+  data.frame(residual = gee_rp_clus_rpdep$models[[1]]$residual),
+  data.frame(working = residuals(gee_rp_clus_rpdep$models[[1]], type = "working")),
+  data.frame(response = residuals(gee_rp_clus_rpdep$models[[1]], type = "response")),
+  data.frame(pearson = residuals(gee_rp_clus_rpdep$models[[1]], type = "pearson"))
+) %>%
+  mutate(
+    my_working = (covid_rate - fitvals) / fitvals,
+    my_pearson = response * (sqrt(gee_rp_clus_rpdep$models[[1]]$prior.weights)) / sqrt(fitvals^2)
+  ) %>%
+  st_sf()
 
 ```
 
@@ -1806,7 +1836,7 @@ gee_resid_gini <- data.frame(
 # map of residuals from correct covid incidence model
 tm_gee_residuals <- tm_shape(gee_resid) +
   tm_polygons("response",
-    title = "Race Model Residuals",
+    title = "Race Model Residuals- Correct Covid Inc",
     style = "equal",
     n = 7,
     border.alpha = .2,
@@ -1828,11 +1858,36 @@ tm_gee_residuals <- tm_shape(gee_resid) +
 
 tm_gee_residuals
 
+# map of residuals from geepack model
+tm_gee_residuals_gp <- tm_shape(gee_resid_gp) +
+  tm_polygons("response",
+    title = "Race Model Residuals - Geepack Model",
+    style = "equal",
+    n = 7,
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "RdBu",
+    legend.hist = FALSE,
+    midpoint = 0
+  ) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = .5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5,
+    legend.width = 0.25,
+    legend.hist.size = 0.5,
+    legend.hist.height = 0.15
+  )
+
+tm_gee_residuals_gp
+
 # map of residuals from sat scan gini optimized clusters 
 
 tm_gee_residuals_gini <- tm_shape(gee_resid_gini) +
   tm_polygons("response",
-    title = "Race Model Residuals GINI",
+    title = "Race Model Residuals- SatScan GINI",
     style = "equal",
     n = 7,
     border.alpha = .2,
@@ -1854,20 +1909,36 @@ tm_gee_residuals_gini <- tm_shape(gee_resid_gini) +
 
 tm_gee_residuals_gini
 
+# map of residuals from sat scan gini optimized clusters 
+
+tm_gee_residuals_epi <- tm_shape(gee_resid_epi) +
+  tm_polygons("response",
+    title = "Race Model Residuals - Spatial EPI",
+    style = "equal",
+    n = 7,
+    border.alpha = .2,
+    lwd = 0.2,
+    palette = "RdBu",
+    legend.hist = FALSE,
+    midpoint = 0
+  ) +
+  tm_shape(state) +
+    tm_borders("grey", lwd = .5) +
+  tm_layout(
+    legend.position = c("left", "bottom"),
+    legend.title.size = 0.8,
+    legend.text.size = 0.5,
+    legend.width = 0.25,
+    legend.hist.size = 0.5,
+    legend.hist.height = 0.15
+  )
+
+tm_gee_residuals_epi
+
 ```
 
-```{r map-clusters-se}
+The 4 maps above illustrate the race model residuals of 4 model variations. Every model seems to produce varying differences between the observed and predicted values. Off the bat the SatScan GINI model produced results most consistent with observed values of the Covid-19 incidence and the race model. Across the United States, the Spatial EPI and Geepack Model produced results that generally overestimated rather than underestimated values. This especially the case in counties found in Southern states specifically in the East South Central and South Atlantic regions of the US. This was also the case in counties part of the Northeast and the Mountain West.
 
-intersection_clus <- st_intersection (gee_data, geometry_data)
-
-tm_gee_clusters <- tm_shape(intersection_clus) +
-  tm_fill("clusterID",
-          palette = c("wheat", "tomato", "thistle3"), 
-          n = 4)
-
-
-tm_gee_clusters
-```
 
 Calculate variance, covariance, correlation, and weights
 
