@@ -2,7 +2,7 @@
 title: "Reproduction of Chakraborty 2021: An intracategorical analysis of COVID-19 and people with disabilities"
 author: "Joseph Holler, Junyi Zhou, Peter Kedron, Drew An-Pham, Derrick Burt, Alexandra Zalecki"
 date: "`r Sys.Date()`"
-output: pdf_document
+output: html_document
 editor_options:
   markdown:
     wrap: sentence
@@ -92,7 +92,7 @@ Other software are not specified in the publication; however data files suggest 
 
 This reproduction study uses R, including the SpatialEpi package for the Kulldorff spatial scan statistics and the geepack package for GEE models.
 
-```{r setup, eval = FALSE}
+```{r setup}
 # list of required packages
 packages <- c(
   "tidycensus", "tidyverse", "downloader", "sf", "classInt", "readr",
@@ -123,7 +123,7 @@ groundhog.library(packages, groundhog.day)
 # In RStudio, restart r with Session -> Restart Session
 
 # non-groundhog method for installing packages:
-lapply(packages, library, character.only = TRUE)
+#lapply(packages, library, character.only = TRUE)
 
 # save the R processing environment
 writeLines(
@@ -177,7 +177,7 @@ Details on ACS data collection can be found at <https://www.census.gov/topics/he
 
 American Community Survey (ACS) data for sociodemographic subcategories of people with disabilities can be accessed by using the `tidycensus` package to query the Census API. This requires an API key which can be acquired at [api.census.gov/data/key_signup.html](https://api.census.gov/data/key_signup.html).
 
-```{r acs-data}
+```{r acs-data, eval = FALSE}
 # If you wish to use a census API key, run the census_api_key() function in the console
 
 # Query disability demographic data with geographic boundaries
